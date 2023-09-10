@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "koa": "^2.14.2",
     "puppeteer": "^21.1.1"
   }
 }

@@ -1,12 +1,33 @@
 const puppeteer = require('puppeteer')
- 
-async function printPDF() {
-  const browser = await puppeteer.launch({ headless: false,args:['--window-size=374,800'] });
+const Koa = require('koa')
+const fs = require("fs")
+
+const app = new Koa();
+
+app.use(async ctx => {
+  console.log(ctx.query)
+  ctx.body = 'Hello World';
+  if(ctx.query.url && ctx.query.w && ctx.query.h ){
+   const fileName = `${__dirname}/downloads/test1.pdf`;
+   let res = await printPDF(ctx.query.url,ctx.query.w,ctx.query.h)
+   if(res &&  fs.existsSync(fileName)){
+      ctx.body = fs.createReadStream(fileName);
+      ctx.attachment(fileName);
+   }else{
+        ctx.throw(500, "Requested file not found on server");
+   }
+  }else{
+        ctx.throw(400, "参数错误");
+  }
+});
+
+
+async function printPDF(url,w,h) {
+  const browser = await puppeteer.launch({ headless: 'new',args:[`--window-size=${w},${h}`] });
   
   const page = await browser.newPage();
   page.setViewport({width:374,height:800})
   page.setUserAgent("Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1")
-  let url = "https://mp.weixin.qq.com/s/ctHof7QFaob1baCdXSpbbw"
   await page.goto(url, {waitUntil: 'networkidle0'});
 
 // page.waitForNavigation({
@@ -15,11 +36,13 @@ async function printPDF() {
  await page.pdf({
    width: '374',
    height:"800" ,
-   path:"./test1.pdf",
+   path:"./downloads/test1.pdf",
    displayHeaderFooter:true
   });
  
   await browser.close();
+  return true
 }
 
-printPDF()
+
+app.listen(3000);
