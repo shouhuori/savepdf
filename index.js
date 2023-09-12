@@ -44,5 +44,5 @@ async function printPDF(url,w,h) {
   return true
 }
 
-
+console.log('is running!');
 app.listen(3000);
