@@ -23,7 +23,7 @@ app.use(async ctx => {
 
 
 async function printPDF(url,w,h) {
-  const browser = await puppeteer.launch({ headless: 'new',args:[`--window-size=${w},${h},'--no-sandbox', '--disable-setuid-sandbox`] });
+  const browser = await puppeteer.launch({ headless: 'new',args:[`--window-size=${w},${h}`,'--no-sandbox', '--disable-setuid-sandbox'] });
   
   const page = await browser.newPage();
   page.setViewport({width:374,height:800})
