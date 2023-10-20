@@ -8,8 +8,8 @@ app.use(async ctx => {
   console.log(ctx.query)
   ctx.body = 'Hello World';
   if(ctx.query.url && ctx.query.w && ctx.query.h ){
-   const fileName = `${__dirname}/downloads/test1.pdf`;
    let res = await printPDF(ctx.query.url,ctx.query.w,ctx.query.h)
+   const fileName = `${__dirname}/downloads/${res}.pdf`;
    if(res &&  fs.existsSync(fileName)){
       ctx.body = fs.createReadStream(fileName);
       ctx.attachment(fileName);
@@ -17,7 +17,7 @@ app.use(async ctx => {
         ctx.throw(500, "Requested file not found on server");
    }
   }else{
-        ctx.throw(400, "参数错误");
+        ctx.throw(400, "is running");
   }
 });
 
@@ -30,18 +30,19 @@ async function printPDF(url,w,h) {
   page.setUserAgent("Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1")
   await page.goto(url, {waitUntil: 'networkidle0'});
 
+  let pageTitle = await page.title()
 // page.waitForNavigation({
   
 // })
  await page.pdf({
    width: '374',
    height:"800" ,
-   path:"./downloads/test1.pdf",
+   path:`./downloads/${pageTitle}.pdf`,
    displayHeaderFooter:true
   });
  
   await browser.close();
-  return true
+  return pageTitle
 }
 
 console.log('is running!');
