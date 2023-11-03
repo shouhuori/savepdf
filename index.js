@@ -1,32 +1,35 @@
-import puppeteer  from 'puppeteer'
-import Koa  from 'koa'
-import fs from "fs"
-import { extract } from '@extractus/article-extractor'
-import path from 'path';
-import { fileURLToPath } from 'url';
-
+import puppeteer from "puppeteer";
+import Koa from "koa";
+import fs from "fs";
+import { extract } from "@extractus/article-extractor";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const app = new Koa();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-console.log(__dirname)
-app.use(async ctx => {
-  console.log(ctx.query)
-  ctx.body = 'Hello World';
-  if(ctx.query.url && ctx.query.w && ctx.query.h ){
-   let res = await printPDF(ctx.query.url,ctx.query.w,ctx.query.h,ctx.query.view)
-   const fileName = `${__dirname}/downloads/${res}.pdf`;
-   if(res &&  fs.existsSync(fileName)){
+console.log(__dirname);
+app.use(async (ctx) => {
+  console.log(ctx.query);
+  ctx.body = "Hello World";
+  if (ctx.query.url && ctx.query.w && ctx.query.h) {
+    let res = await printPDF(
+      ctx.query.url,
+      ctx.query.w,
+      ctx.query.h,
+      ctx.query.view
+    );
+    const fileName = `${__dirname}/downloads/${res}.pdf`;
+    if (res && fs.existsSync(fileName)) {
       ctx.body = fs.createReadStream(fileName);
       ctx.attachment(fileName);
-   }else{
-        ctx.throw(500, "Requested file not found on server");
-   }
-  }else{
-        ctx.throw(400, "is running");
+    } else {
+      ctx.throw(500, "Requested file not found on server");
+    }
+  } else {
+    ctx.throw(400, "is running");
   }
 });
-
 
 /**
  * 打印PDF
@@ -35,14 +38,14 @@ async function printPDF(url, w, h, view) {
   if (view === "reader") {
     try {
       const article = await extract(url);
-      console.log(article);
+      saveHtml(article);
     } catch (err) {
       console.error(err);
     }
     return true;
   }
 
-  console.log(view)
+  console.log(view);
   const browser = await puppeteer.launch({
     headless: "new",
     args: [
@@ -74,5 +77,42 @@ async function printPDF(url, w, h, view) {
   return pageTitle;
 }
 
-console.log('is running!');
+function saveHtml(article) {
+  const html = `
+  <!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>${article.title}</title>
+    <link rel="stylesheet" href="../bulma.min.css">
+  </head>
+  <body>
+  <section class="section">
+    <div class="container">
+      <h1 class="title">
+        ${article.title}
+      </h1>
+      <p class="subtitle">
+      ${article.author}
+      ${article.url}
+      ${article.description}
+      </p>
+      <div class="content">
+
+      ${article.content}
+      </div>
+      </div>  
+      </section>
+    </body
+  `;
+
+  fs.writeFile(`${__dirname}/readerHtml/html/${article.title}.html`, html, (err) => {
+    if (err) {
+      console.error(err);
+    }
+  });
+}
+
+console.log("is running!");
 app.listen(3000);
