@@ -4,6 +4,10 @@ import fs from "fs";
 import { extract } from "@extractus/article-extractor";
 import path from "path";
 import { fileURLToPath } from "url";
+import { v4 as uuidv4 } from 'uuid';
+
+// 测试下载地址
+// http://localhost:3000/?url=https://www.authing.com/blog/633&w=375&h=800&view=reader
 
 const app = new Koa();
 const __filename = fileURLToPath(import.meta.url);
@@ -38,11 +42,15 @@ async function printPDF(url, w, h, view) {
   if (view === "reader") {
     try {
       const article = await extract(url);
-      saveHtml(article);
+      if(!article){
+        return '暂不支持'
+      }
+      const htmlName = uuidv4()+'.html'
+      saveHtml(article,htmlName)
+      url = `file://${__dirname}/readerHtml/html/${htmlName}`;
     } catch (err) {
       console.error(err);
     }
-    return true;
   }
 
   console.log(view);
@@ -77,13 +85,16 @@ async function printPDF(url, w, h, view) {
   return pageTitle;
 }
 
-function saveHtml(article) {
+/**
+ * 
+ */
+function saveHtml(article,htmlName) {
   const html = `
   <!DOCTYPE html>
 <html>
   <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1.0,user-scalable=no,minimum-scale=1.0,maximum-scale=1.0"/>
     <title>${article.title}</title>
     <link rel="stylesheet" href="../bulma.min.css">
   </head>
@@ -107,11 +118,15 @@ function saveHtml(article) {
     </body
   `;
 
-  fs.writeFile(`${__dirname}/readerHtml/html/${article.title}.html`, html, (err) => {
-    if (err) {
-      console.error(err);
+  fs.writeFile(
+    `${__dirname}/readerHtml/html/${htmlName}`,
+    html,
+    (err) => {
+      if (err) {
+        console.error(err);
+      }
     }
-  });
+  );
 }
 
 console.log("is running!");

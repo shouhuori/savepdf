@@ -12,8 +12,8 @@
   "dependencies": {
     "@extractus/article-extractor": "^8.0.3",
     "koa": "^2.14.2",
-    "puppeteer": "^21.1.1"
+    "puppeteer": "^21.1.1",
+    "uuid": "^9.0.1"
   },
   "type": "module"
-
 }
