@@ -78,7 +78,15 @@ async function printPDF(url, w, h, view) {
     width: "374",
     height: "800",
     path: `./downloads/${pageTitle}.pdf`,
-    displayHeaderFooter: true,
+    displayHeaderFooter: false,
+    // headerTemplate: '<div style="font-size:16px;width:100%;text-align:center;">HEADER</div>',
+    // footerTemplate: '<div style="font-size:16px;width:100%;text-align:center;">FOOTER</div>',
+    margin:{
+      top: '30px',
+      bottom: '30px',
+      right: 0,
+      left: 0,
+    }
   });
 
   await browser.close();
